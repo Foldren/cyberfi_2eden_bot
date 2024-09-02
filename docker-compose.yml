@@ -1,0 +1,14 @@
+services:
+  aiogram:
+    container_name: bot
+    image: 2eden_bot
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Moscow
+    networks:
+      - 2eden_network
+    volumes:
+      - ./source:/home
+
+networks:
+  2eden_network:
