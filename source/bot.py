@@ -50,7 +50,8 @@ async def start(message: Message, command: CommandObject):
     except IntegrityError:
         pass
 
-    await message.answer(text="Привет, я бот тест для WebApp, нажми на кнопку чтобы начать 😉")
+    await message.answer(text="Привет, я бот тест для WebApp\n"
+                              "нажми на кнопку <b>Игра</b> чтобы начать 😉")
 
 
 if __name__ == "__main__":
