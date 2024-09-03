@@ -6,7 +6,7 @@ from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_
 from tortoise.fields import BigIntField, DateField, CharEnumField, CharField, DatetimeField, \
     OnDelete, ForeignKeyField, OneToOneField, \
     OneToOneRelation, ReverseRelation, FloatField, BooleanField
-from source.components.enums import RankName, RewardTypeName, VisibilityType, ConditionType
+from components.enums import RankName, RewardTypeName, VisibilityType, ConditionType
 
 
 class Rank(Model):  # В системе изначально создаются все 10 рангов
