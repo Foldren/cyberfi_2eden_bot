@@ -1,5 +1,5 @@
-from source.components import enums
-from source.db_models.api import User, Reward
+from components import enums
+from db_models.api import User, Reward
 
 
 async def get_referral_reward(lead: User, referral_code: str) -> None:
