@@ -12,3 +12,4 @@ services:
 
 networks:
   2eden_network:
+    external: true
