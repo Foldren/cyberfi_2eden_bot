@@ -1,7 +1,7 @@
 services:
   aiogram:
+    build: .
     container_name: bot
-    image: 2eden_bot
     restart: unless-stopped
     environment:
       - TZ=Europe/Moscow
