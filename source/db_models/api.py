@@ -4,7 +4,8 @@ from pytz import timezone
 from tortoise import Model, Tortoise
 from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 from tortoise.fields import BigIntField, DateField, CharEnumField, CharField, DatetimeField, \
-    OnDelete, ForeignKeyField, OneToOneField, OneToOneRelation, ReverseRelation, FloatField, BooleanField
+    OnDelete, ForeignKeyField, OneToOneField, \
+    OneToOneRelation, ReverseRelation, FloatField, BooleanField
 from components.enums import RankName, RewardTypeName, VisibilityType, ConditionType
 
 
@@ -48,7 +49,8 @@ class User(Model):
 
 
 class Activity(Model):
-    id = OneToOneField(pk=True, model_name="api.User", on_delete=OnDelete.CASCADE, related_name="activity")
+    id = BigIntField(pk=True)
+    user = OneToOneField(model_name="api.User", on_delete=OnDelete.CASCADE, related_name="activity")
     reg_date = DateField(default=datetime.now())  # -
     last_login_date = DateField(default=datetime.now())
     last_daily_reward = DateField(default=(datetime.now(tz=timezone("Europe/Moscow")) - timedelta(hours=35)))
@@ -63,7 +65,8 @@ class Activity(Model):
 
 
 class Stats(Model):
-    id = OneToOneField(pk=True, model_name="api.User", on_delete=OnDelete.CASCADE, related_name="stats")
+    id = BigIntField(pk=True)
+    user = OneToOneField(model_name="api.User", on_delete=OnDelete.CASCADE, related_name="stats")
     coins = BigIntField(default=1000)
     energy = FloatField(default=2000)
     earned_week_coins = BigIntField(default=0)
@@ -168,3 +171,9 @@ Tortoise.init_models(["db_models.api"], "api")
 
 User_Pydantic = pydantic_model_creator(User, name="User")
 User_Pydantic_List = pydantic_queryset_creator(User, name="UserList")
+
+# Reward_Pydantic = pydantic_model_creator(Reward, name="Reward")
+# Reward_Pydantic_List = pydantic_queryset_creator(Reward, name="RewardList")
+#
+# Stats_Pydantic = pydantic_model_creator(Stats, name="Stats")
+# Stats_Pydantic_List = pydantic_queryset_creator(Stats, name="StatsList")
