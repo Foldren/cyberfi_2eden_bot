@@ -37,10 +37,11 @@ async def start(message: Message, command: CommandObject):
     try:
         language_code = message.from_user.language_code.upper()
         user = await User.create(id=message.from_user.id, country=language_code, rank_id=1)
-        await Stats.create(user_id=user.id)
-        await Activity.create(user_id=user.id)
+        await Stats.create(id=user.id)
+        await Activity.create(id=user.id)
 
         # Проверяем отправлен ли дополнительно реферальный код, если да то отправляем награду
+        # https://t.me/twoeden_bot?start={referral_code}
         try:
             referral_code = command.args.split(" ")[0]
             await get_referral_reward(user, referral_code)
