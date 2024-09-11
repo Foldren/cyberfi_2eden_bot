@@ -7,5 +7,5 @@ COPY requirements.txt .
 RUN pip install -r requirements.txt
 
 COPY src ./.project
-#try
+#22
 CMD ["python", "bot.py"]
