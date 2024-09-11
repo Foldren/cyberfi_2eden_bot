@@ -1,11 +1,11 @@
 FROM python:3.12-slim
 
-WORKDIR /home
+WORKDIR /root
 
 COPY requirements.txt .
 
 RUN pip install -r requirements.txt
 
-COPY ./source .
+COPY src ./.project
 
 CMD ["python", "bot.py"]
