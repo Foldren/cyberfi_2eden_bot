@@ -4,15 +4,23 @@ from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import CommandObject, Command
+from aiogram.fsm.storage.base import DefaultKeyBuilder
+from aiogram.fsm.storage.redis import RedisStorage
 from aiogram.types import Message, MenuButtonWebApp, WebAppInfo
+from redis.asyncio import Redis
 from tortoise import run_async, Tortoise
 from tortoise.exceptions import IntegrityError
 from components.tools import get_referral_reward
-from config import TOKEN, WEB_APP_URL, TORTOISE_CONFIG
+from config import TOKEN, WEB_APP_URL, TORTOISE_CONFIG, REDIS_URL
 from db_models.api import User, Stats, Activity
 
+# Используемые базы данных Redis
+# db 0 - кеш для стейтов бота
+# db9 - Для asgi_limit
+# db10 - Кеш fastapi_cache
+
 bot = Bot(token=TOKEN, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
-dp = Dispatcher()
+dp = Dispatcher(storage=RedisStorage(Redis.from_url(REDIS_URL, db=0)), key_builder=DefaultKeyBuilder(with_destiny=True))
 
 
 async def main():

@@ -10,6 +10,8 @@ WEB_APP_URL = getenv("WEB_APP_URL")
 
 PG_CONFIG = yaml.load(getenv('PG_CONFIG'), Loader=yaml.Loader)
 
+REDIS_URL = getenv('REDIS_URL')
+
 TORTOISE_CONFIG = {
     "connections": {
         "api": {
