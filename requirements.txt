@@ -7,3 +7,4 @@ python-dotenv==1.0.1
 pytz==2024.1
 tortoise-orm==0.21.5
 asyncpg==0.29.0
+redis==5.0.8
