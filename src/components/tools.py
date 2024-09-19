@@ -1,5 +1,5 @@
-from components import enums
-from db_models.api import User, Reward
+import models
+from models import User, Reward
 
 
 async def get_referral_reward(lead: User, referral_code: str) -> None:
@@ -18,10 +18,10 @@ async def get_referral_reward(lead: User, referral_code: str) -> None:
 
         match referrer.stats.invited_friends:
             case 1:
-                await Reward.create(type_name=enums.RewardTypeName.INVITE_FRIENDS, user_id=referrer.id, amount=2000)
+                await Reward.create(type_name=models.RewardType.INVITE_FRIENDS, user_id=referrer.id, amount=2000)
             case 5:
-                await Reward.create(type_name=enums.RewardTypeName.INVITE_FRIENDS, user_id=referrer.id, amount=5000)
+                await Reward.create(type_name=models.RewardType.INVITE_FRIENDS, user_id=referrer.id, amount=5000)
             case 100:
-                await Reward.create(type_name=enums.RewardTypeName.INVITE_FRIENDS, user_id=referrer.id, amount=50000)
+                await Reward.create(type_name=models.RewardType.INVITE_FRIENDS, user_id=referrer.id, amount=50000)
             case 1000:
-                await Reward.create(type_name=enums.RewardTypeName.INVITE_FRIENDS, user_id=referrer.id, amount=250000)
+                await Reward.create(type_name=models.RewardType.INVITE_FRIENDS, user_id=referrer.id, amount=250000)

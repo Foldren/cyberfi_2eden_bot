@@ -12,7 +12,7 @@ from tortoise import run_async, Tortoise
 from tortoise.exceptions import IntegrityError
 from components.tools import get_referral_reward
 from config import TOKEN, WEB_APP_URL, TORTOISE_CONFIG, REDIS_URL
-from db_models.api import User, Stats, Activity
+from models import User, Stats, Activity
 
 # Используемые базы данных Redis
 # db 0 - кеш для стейтов бота

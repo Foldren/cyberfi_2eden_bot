@@ -1,13 +1,54 @@
 from datetime import datetime, timedelta
+from enum import Enum
 from uuid import uuid4
 from pytz import timezone
 from tortoise import Model, Tortoise
 from tortoise.contrib.pydantic import pydantic_model_creator, pydantic_queryset_creator
 from tortoise.fields import BigIntField, DateField, CharEnumField, CharField, DatetimeField, \
-    OnDelete, ForeignKeyField, OneToOneField, OneToOneRelation, ReverseRelation, FloatField, BooleanField
-from components.enums import RankName, RewardTypeName, VisibilityType, ConditionType
+    OnDelete, ForeignKeyField, OneToOneField, OneToOneRelation, ReverseRelation, FloatField, BooleanField, TextField
 
 
+# Enums ----------------------------------------------------------------------------------------------------------------
+class RankName(str, Enum):
+    ACOLYTE = "Acolyte"
+    DEACON = "Deacon"
+    PRIEST = "Priest"
+    ARCHDEACON = "Archdeacon"
+    BISHOP = "Bishop"
+    ARCHBISHOP = "Archbishop"
+    METROPOLITAN = "Metropolitan"
+    CARDINAL = "Cardinal"
+    PATRIARCH = "Patriarch"
+    MASTER = "Master"
+    POPE = "Pope"
+
+
+class RewardType(str, Enum):
+    LAUNCHES_SERIES = "launches_series"
+    INVITE_FRIENDS = "invite_friends"
+    LEADERBOARD = "leaderboard"
+    TASK = "task"
+    REFERRAL = "referral"
+    AI_QUESTION = "ai_question"
+
+
+class QuestionStatus(str, Enum):
+    IN_PROGRESS = "in_progress"
+    HAVE_ANSWER = "have_answer"
+    RECEIVED_REWARD = "received_reward"
+
+
+class ConditionType(str, Enum):
+    TG_CHANNEL = "tg_channel"
+    VISIT_LINK = "visit_link"
+
+
+class VisibilityType(str, Enum):
+    ALLWAYS = "allways"
+    RANK = "rank"
+
+
+# Models ---------------------------------------------------------------------------------------------------------------
 class Rank(Model):  # В системе изначально создаются все 10 рангов
     id = BigIntField(pk=True)
     users: ReverseRelation["User"]
@@ -21,9 +62,6 @@ class Rank(Model):  # В системе изначально создаются 
     def __str__(self):
         return self.id
 
-    class Meta:
-        table = "ranks"
-
 
 class User(Model):
     id = BigIntField(pk=True)  # = chat_id в телеграм
@@ -33,6 +71,7 @@ class User(Model):
     stats: OneToOneRelation["Stats"]
     activity: OneToOneRelation["Activity"]
     rewards: ReverseRelation["Reward"]
+    questions: OneToOneRelation["Question"]
     leader_place: OneToOneRelation["Leader"]
     country = CharField(max_length=50)  # -
     referral_code = CharField(max_length=40, default=uuid4, unique=True)
@@ -40,27 +79,18 @@ class User(Model):
     def __str__(self):
         return self.id
 
-    class Meta:
-        table = "users"
-
-    class PydanticMeta:
-        exclude = ("token", "leads")
-
 
 class Activity(Model):
     id = BigIntField(pk=True)
     user = OneToOneField(model_name="api.User", on_delete=OnDelete.CASCADE, related_name="activity")
-    reg_date = DateField(default=datetime.now())  # -
-    last_login_date = DateField(default=datetime.now())
+    reg_date = DateField(default=datetime.now(tz=timezone("Europe/Moscow")))  # -
+    last_login_date = DateField(default=datetime.now(tz=timezone("Europe/Moscow")))
     last_daily_reward = DateField(default=(datetime.now(tz=timezone("Europe/Moscow")) - timedelta(hours=35)))
-    last_sync_energy = DatetimeField(default=(datetime.now(tz=timezone("Europe/Moscow"))))
+    last_sync_energy = DatetimeField(default=datetime.now(tz=timezone("Europe/Moscow")))
     next_inspiration = DatetimeField(default=(datetime.now(tz=timezone("Europe/Moscow")) - timedelta(days=1)))
     next_mining = DatetimeField(default=(datetime.now(tz=timezone("Europe/Moscow")) - timedelta(days=1)))
     is_active_mining = BooleanField(default=False)
     active_days = BigIntField(default=0)
-
-    class Meta:
-        table = "activities"
 
 
 class Stats(Model):
@@ -73,20 +103,14 @@ class Stats(Model):
     inspirations = BigIntField(default=0)
     replenishments = BigIntField(default=0)
 
-    class Meta:
-        table = "stats"
-
 
 class Reward(Model):
     id = BigIntField(pk=True)
     user = ForeignKeyField(model_name="api.User", on_delete=OnDelete.CASCADE, related_name="rewards")
-    type_name = CharEnumField(enum_type=RewardTypeName, default=RewardTypeName.REFERRAL, description='Награда')
+    type = CharEnumField(enum_type=RewardType, default=RewardType.REFERRAL, description='Награда')
     amount = BigIntField(default=0)
     inspirations = BigIntField(default=0)
     replenishments = BigIntField(default=0)
-
-    class Meta:
-        table = "rewards"
 
 
 class Leader(Model):
@@ -94,8 +118,17 @@ class Leader(Model):
     user = OneToOneField(model_name="api.User", on_delete=OnDelete.CASCADE, related_name="leader_place")
     earned_week_coins = BigIntField(default=0)
 
-    class Meta:
-        table = "leaders"
+
+class Question(Model):
+    id = BigIntField(pk=True)
+    user = ForeignKeyField('api.User', on_delete=OnDelete.CASCADE, related_name='questions')
+    datetime_sent = DatetimeField(default=datetime.now(tz=timezone("Europe/Moscow")))
+    u_text = CharField(max_length=1000)  # На пользовательском языке
+    text = CharField(max_length=1000)  # Всегда на английском
+    answer = CharField(max_length=1000, null=True)  # Всегда на русском
+    embedding = TextField(null=True)
+    secret = BooleanField(default=0)
+    status = CharEnumField(enum_type=QuestionStatus, default=QuestionStatus.IN_PROGRESS, description='Статус')
 
 
 # ------ Условия выполнения задач ------
@@ -166,7 +199,8 @@ class UserTask(Model):
         return self.completed_time is not None
 
 
-Tortoise.init_models(["db_models.api"], "api")
-
+# Pydantic -------------------------------------------------------------------------------------------------------------
+Tortoise.init_models(["models"], "api")
 User_Pydantic = pydantic_model_creator(User, name="User")
-User_Pydantic_List = pydantic_queryset_creator(User, name="UserList")
+Questions_Pydantic_List = pydantic_queryset_creator(Question, name="Questions",
+                                                    exclude=("embedding", "text", "secret", "user"))
