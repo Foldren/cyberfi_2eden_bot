@@ -1,5 +1,7 @@
 import logging
 from asyncio import run
+from io import BytesIO
+
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -44,7 +46,20 @@ async def start(message: Message, command: CommandObject):
     # Пытаемся создать пользователя, если его нет
     try:
         language_code = message.from_user.language_code.upper()
-        user = await User.create(id=message.from_user.id, country=language_code, rank_id=1)
+        user_avatars = await bot.get_user_profile_photos(user_id=message.from_user.id)
+        io = BytesIO()
+
+        if user_avatars:
+            await user_avatars.photos[0][-1].download(destination=io)
+            avatar_bytes = io.getvalue()
+        else:
+            avatar_bytes = None
+
+        user = await User.create(id=message.from_user.id,
+                                 country=language_code,
+                                 username=message.from_user.username,
+                                 avatar=avatar_bytes)
+
         await Stats.create(user_id=user.id)
         await Activity.create(user_id=user.id)
 
