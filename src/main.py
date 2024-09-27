@@ -48,7 +48,7 @@ async def start(message: Message, command: CommandObject):
         user_avatars = await bot.get_user_profile_photos(user_id=message.from_user.id)
         io = BytesIO()
 
-        if user_avatars:
+        if user_avatars.total_count != 0:
             await bot.download(file=user_avatars.photos[0][0].file_id, destination=io)
             avatar_bytes = io.getvalue()
         else:
