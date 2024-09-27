@@ -1,7 +1,6 @@
 import logging
 from asyncio import run
 from io import BytesIO
-
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
@@ -50,7 +49,7 @@ async def start(message: Message, command: CommandObject):
         io = BytesIO()
 
         if user_avatars:
-            await user_avatars.photos[0][-1].download(destination=io)
+            await bot.download(file=user_avatars.photos[0][0].file_id, destination=io)
             avatar_bytes = io.getvalue()
         else:
             avatar_bytes = None
