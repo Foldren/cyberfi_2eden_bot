@@ -64,8 +64,7 @@ async def start(message: Message, command: CommandObject):
 
         # Проверяем отправлен ли дополнительно реферальный код, если да то отправляем награду
         try:
-            referral_code = command.args.split(" ")[0]
-            print(referral_code)
+            referral_code = command.args.strip()
             await get_referral_reward(user, referral_code)
         except AttributeError:
             pass
